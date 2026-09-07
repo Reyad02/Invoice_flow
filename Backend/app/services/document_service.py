@@ -1,7 +1,7 @@
 import base64 
 from dataclasses import dataclass 
 from typing import Literal 
-import fitz 
+import pymupdf
 from app.core.config import settings 
 
 @dataclass 
@@ -11,7 +11,7 @@ class ProcessedDocument:
     images: list[dict] | None = None 
     
 def extract_text_from_pdf(file_path: str) -> str: 
-    document = fitz.open(file_path) 
+    document = pymupdf.open(file_path) 
     pages_text = [] 
     
     try: 
@@ -30,12 +30,12 @@ def has_useful_text(text: str) -> bool:
     return len(cleaned_text) >= settings.MIN_EXTRACTED_TEXT_CHARS  
 
 def pdf_to_images( file_path: str ) -> list[dict]: 
-    document = fitz.open(file_path) 
+    document = pymupdf.open(file_path) 
     images = [] 
     
     try: 
         for page in document: 
-            matrix = fitz.Matrix(2, 2) 
+            matrix = pymupdf.Matrix(2, 2) 
             pixmap = page.get_pixmap(matrix=matrix, alpha=False) 
             image_bytes = pixmap.tobytes("png") 
             image_base64 = base64.b64encode(image_bytes).decode("utf-8") 

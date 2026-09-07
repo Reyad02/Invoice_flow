@@ -29,7 +29,7 @@ Important rules:
 class InvoiceLLMService:
 
     def __init__(self):
-        self.llm = ChatOpenAI(model=settings.OPENAI_MODEL)
+        self.llm = ChatOpenAI(model=settings.OPENAI_MODEL, api_key=settings.OPENAI_API_KEY)
         self.structured_llm = self.llm.with_structured_output(
             InvoiceExtraction,
             method="json_schema"

@@ -10,7 +10,7 @@ class Invoice(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     filename: Mapped[str] = mapped_column(String)
     input_type: Mapped[str | None] = mapped_column(String, nullable=True)
-    invoice_number: Mapped[str | None] = mapped_column(String, nullable=True)
+    invoice_number: Mapped[str | None] = mapped_column(String, nullable=True, unique=True)
     supplier_name: Mapped[str | None] = mapped_column(String, nullable=True)
     invoice_date: Mapped[str | None] = mapped_column(String, nullable=True)
     due_date: Mapped[str | None] = mapped_column(String, nullable=True)

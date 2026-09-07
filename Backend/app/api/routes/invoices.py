@@ -7,6 +7,7 @@ from app.database.database import get_db
 from app.models.invoice import Invoice
 from app.graphs.invoice_graph import invoice_graph
 from app.utils.file_utils import is_allowed_file, generate_filename
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 UPLOAD_DIR = "uploads"
@@ -19,26 +20,48 @@ async def process_invoice(
 ):
     
     if not file.filename:
-        raise HTTPException(
+        return JSONResponse(
             status_code=400,
-            detail=(
-                "File name is required"
-            )
+            content={
+                "success": False,
+                "message": "File name is required",
+                "data": [],
+                "error": {
+                    "code": 400,
+                    "details": "File name is required" 
+                }
+            }
         )
 
     if not is_allowed_file(file.filename):
-        raise HTTPException(
+        return JSONResponse(
             status_code=400,
-            detail="Only PDF, PNG, JPG and JPEG files are allowed"
+            content={
+                "success": False,
+                "message": "Only PDF, PNG, JPG and JPEG files are allowed",
+                "data": [],
+                "error": {
+                    "code": 400,
+                    "details": "Only PDF, PNG, JPG and JPEG files are allowed" 
+                }
+            }
         )
 
     file_content = await file.read()
     max_size_bytes = settings.MAX_FILE_SIZE_MB * 1024 * 1024
 
     if (len(file_content)>max_size_bytes):
-        raise HTTPException(
+        return JSONResponse(
             status_code=400,
-            detail=f"File size exceeds {settings.MAX_FILE_SIZE_MB} MB"
+            content={
+                "success": False,
+                "message": f"File size exceeds {settings.MAX_FILE_SIZE_MB} MB",
+                "data": [],
+                "error": {
+                    "code": 400,
+                    "details": f"File size exceeds {settings.MAX_FILE_SIZE_MB} MB" 
+                }
+            }
         )
 
     unique_filename = generate_filename(file.filename)
@@ -64,8 +87,35 @@ async def process_invoice(
         result = invoice_graph.invoke(initial_state)
         invoice_data = result.get("invoice_data") or {}
         validation_results = result.get("validation_results") or []
+        failed_validations = [
+            validation for validation in validation_results
+            if validation.get("status") == "FAILED"
+        ]
+        print(failed_validations)
+        
         status = result.get("status")
+        invoice_number = invoice_data.get("invoice_number")
 
+        if invoice_number:
+            existing_invoice = db.query(Invoice).filter(Invoice.invoice_number == invoice_number).first()
+            
+            if existing_invoice:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                
+                return JSONResponse(
+                    status_code=409,
+                    content={
+                        "success": False,
+                        "message": f"Invoice - {invoice_number} already exists in the system",
+                        "data": [],
+                        "error": {
+                            "code": 409,
+                            "details": f"Invoice - {invoice_number} already exists in the system"
+                        }
+                    }
+                )
+                
         invoice = Invoice(
             filename=file.filename,
             input_type=result.get( "input_type"),
@@ -86,22 +136,43 @@ async def process_invoice(
         db.add(invoice)
         db.commit()
         db.refresh(invoice)
-
-        return {
-            "invoice_id": invoice.id,
-            "filename": file.filename,
-            "input_type": result.get("input_type"),
-            "status": status,
-            "invoice_data": invoice_data,
-            "validation_results": validation_results,
-            "error": result.get("error")
-        }
+        
+        return JSONResponse(
+            status_code=201,
+            content={
+                "success": True,
+                "message": "Invoice processed successfully",
+                "data": [
+                            {
+                                "invoice_id": invoice.id,
+                                "filename": file.filename,
+                                "input_type": result.get("input_type"),
+                                "status": status,
+                                "invoice_data": invoice_data,
+                                "validation_results": validation_results,
+                                "error": result.get("error")
+                            }
+                        ],
+                "error": {
+                    "code": "",
+                    "details": ""
+                }
+            }
+        )
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(
+        return JSONResponse(
             status_code=500,
-            detail=str(e)
+            content={
+                "success": False,
+                "message": "Something went wrong while processing the invoice",
+                "data": None,
+                "error": {
+                    "code": "500",
+                    "details": str(e)
+                }
+            }
         )
 
     finally:
@@ -128,7 +199,18 @@ def get_invoices(db: Session = Depends(get_db)):
             } 
         ) 
         
-    return results
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "message": "Invoice retrieved successfully",
+            "data": results,
+            "error": {
+                "code": "",
+                "details": ""
+            }
+        }
+    )
 
 @router.get("/{invoice_id}")
 
@@ -139,12 +221,20 @@ def get_invoice(
 
     invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
     if not invoice:
-        raise HTTPException(
+        return JSONResponse(
             status_code=404,
-            detail="Invoice not found"
+            content={
+                "success":  False,
+                "message": f"Invoice - {invoice_id} not found",
+                "data": [],
+                "error": {
+                    "code": 404,
+                    "details": f"Invoice - {invoice_id} not found"
+                }
+            }
         )
 
-    return {
+    result = {
         "id": invoice.id,
         "filename": invoice.filename,
         "input_type": invoice.input_type,
@@ -162,3 +252,16 @@ def get_invoice(
         "status": invoice.status,
         "created_at": invoice.created_at
     }
+    
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "message": f"Invoice - {invoice_id} retrieved successfully",
+            "data": [result],
+            "error": {
+                "code": "",
+                "details": ""
+            }
+        }
+    )
