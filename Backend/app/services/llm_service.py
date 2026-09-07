@@ -66,12 +66,12 @@ class InvoiceLLMService:
             }
         ]
 
-        for image_base64 in images:
+        for image in images:
             content.append(
                 {
                     "type": "image",
-                    "base64": image_base64,
-                    "mime_type": "image/png"
+                    "base64": image["base64"],
+                    "mime_type": image["mime_type"]
                 }
             )
 
