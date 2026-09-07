@@ -91,7 +91,27 @@ async def process_invoice(
             validation for validation in validation_results
             if validation.get("status") == "FAILED"
         ]
-        print(failed_validations)
+        validation_error_messages = []
+        for validation in failed_validations:
+            message = validation.get("message", "")
+            validation_error_messages.append(message)
+            
+        if len(validation_error_messages):
+            validation_errors_summary = "; ".join(validation_error_messages)
+            
+        if len(failed_validations) > 0:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "message": f"Validation failed: {validation_errors_summary}",
+                    "data": [],
+                    "error": {
+                        "code": 400,
+                        "details": validation_errors_summary,
+                    }
+                }
+            )
         
         status = result.get("status")
         invoice_number = invoice_data.get("invoice_number")
