@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes.invoices import router as invoice_router 
+from app.database.database import Base, engine
+from app.models.invoice import Invoice
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="InvoiceFlow",
@@ -15,6 +20,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(
+    invoice_router, 
+    prefix="/api/invoices", 
+    tags=["Invoices"] 
+)
 
 @app.get("/")
 def root():
@@ -22,7 +32,6 @@ def root():
     return {
         "message": "InvoiceFlow AI Backend is running"
     }
-
 
 @app.get("/health")
 def health_check():
