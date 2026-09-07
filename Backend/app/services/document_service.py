@@ -63,3 +63,13 @@ def process_pdf( file_path: str ) -> ProcessedDocument:
     # Convert all pages to images 
     page_images = pdf_to_base64_images(file_path) 
     return ProcessedDocument( document_type="images", text=None, images=page_images )
+
+def get_image_mime_type( filename: str ) -> str: 
+    filename = filename.lower() 
+    if filename.endswith(".png"): 
+        return "image/png" 
+    
+    if ( filename.endswith(".jpg") or filename.endswith(".jpeg") ): 
+        return "image/jpeg" 
+    
+    raise ValueError( "Unsupported image format" )
