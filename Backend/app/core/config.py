@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     OPENAI_MODEL: str
     MAX_FILE_SIZE_MB: int = 20
+    MIN_EXTRACTED_TEXT_CHARS: int
 
     class Config:
         env_file = f'{BASE_DIR}/.env'
