@@ -3,10 +3,15 @@ import UploadInvoice from "./pages/UploadInvoice";
 import ManualInvoice from "./pages/ManualInvoice";
 import InvoiceList from "./pages/InvoiceList";
 import InvoiceDetail from "./pages/InvoiceDetail";
+import Navbar from "./components/Navbar";
+import { Toaster } from 'sonner';
+
 
 function App() {
   return (
     <BrowserRouter>
+      <Navbar />
+      <Toaster/>
       <Routes>
         <Route path="/" element={<UploadInvoice />} />
 

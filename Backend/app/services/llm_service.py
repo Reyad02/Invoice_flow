@@ -2,6 +2,9 @@ from langchain_core.messages import HumanMessage,SystemMessage
 from langchain_openai import ChatOpenAI
 from app.core.config import settings
 from app.schemas.invoice import InvoiceExtraction
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SYSTEM_PROMPT = """
 You are an intelligent invoice data extraction system.
@@ -46,7 +49,7 @@ class InvoiceLLMService:
                     """
             )
         ]
-        result = self.structured_llm.invoke(messages)
+        result = self.structured_llm.invoke(messages, config={"run_name": "invoice_text_extraction"})
         return result
 
 
@@ -79,6 +82,6 @@ class InvoiceLLMService:
             SystemMessage(content=SYSTEM_PROMPT),
             HumanMessage(content=content)
         ]
-        result = self.structured_llm.invoke(messages)
+        result = self.structured_llm.invoke(messages, config={"run_name": "invoice_image_extraction"})
         
         return result
