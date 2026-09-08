@@ -13,6 +13,15 @@ router = APIRouter()
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+error_type={
+    "file_name": "File_Name_Required",
+    "file_extension": "File_Extension_Issue",
+    "file_size": "File_Size_Exceed",
+    "validation": "Validation_Error",
+    "duplication": "Invoice_Duplication",
+    "invoice_not_found": "Invoice_Not_Found"
+}
+
 @router.post("/process")
 async def process_invoice(
     file: UploadFile = File(...),
@@ -28,7 +37,7 @@ async def process_invoice(
                 "data": [],
                 "error": {
                     "code": 400,
-                    "details": "File name is required" 
+                    "details": error_type["file_name"] 
                 }
             }
         )
@@ -42,7 +51,7 @@ async def process_invoice(
                 "data": [],
                 "error": {
                     "code": 400,
-                    "details": "Only PDF, PNG, JPG and JPEG files are allowed" 
+                    "details": error_type["file_extension"] 
                 }
             }
         )
@@ -59,7 +68,7 @@ async def process_invoice(
                 "data": [],
                 "error": {
                     "code": 400,
-                    "details": f"File size exceeds {settings.MAX_FILE_SIZE_MB} MB" 
+                    "details": error_type["file_size"]
                 }
             }
         )
@@ -108,7 +117,7 @@ async def process_invoice(
                     "data": [],
                     "error": {
                         "code": 400,
-                        "details": validation_errors_summary,
+                        "details": error_type["validation"]
                     }
                 }
             )
@@ -131,7 +140,7 @@ async def process_invoice(
                         "data": [],
                         "error": {
                             "code": 409,
-                            "details": f"Invoice - {invoice_number} already exists in the system"
+                            "details": error_type["duplication"]
                         }
                     }
                 )
@@ -249,7 +258,7 @@ def get_invoice(
                 "data": [],
                 "error": {
                     "code": 404,
-                    "details": f"Invoice - {invoice_id} not found"
+                    "details": error_type["invoice_not_found"]
                 }
             }
         )
