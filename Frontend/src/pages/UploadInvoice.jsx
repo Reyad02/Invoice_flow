@@ -45,21 +45,21 @@ function UploadInvoice() {
 
             if (response.error?.details === "Validation_Error") {
 
-                // navigate(
-                //     "/manual-invoice",
-                //     {
-                //         state: {
-                //             message: response.message,
-                //             validationError: response.error,
-                //             originalFile: file
-                //         }
-                //     }
-                // );
+                navigate(
+                    "/manual-invoice",
+                    {
+                        state: {
+                            message: response.message,
+                            validationError: response.error,
+                            originalFile: file
+                        }
+                    }
+                );
 
-                // return;
+                return;
 
-                console.log(response.message);
-                console.log(response.error);
+                // console.log(response.message);
+                // console.log(response.error);
             }
 
 
@@ -79,20 +79,20 @@ function UploadInvoice() {
             // ============================
 
             if (responseData?.error?.details === "Validation_Error") {
-                // navigate("/manual-invoice",
-                //     {
-                //         state: {
-                //             message: responseData.message,
-                //             validationError: responseData.error
-                //         }
-                //     }
-                // );
+                navigate("/manual-invoice",
+                    {
+                        state: {
+                            message: responseData.message,
+                            validationError: responseData.error
+                        }
+                    }
+                );
 
-                // return;
+                return;
 
                 
-                console.log(responseData.message);
-                console.log(responseData.error);
+                // console.log(responseData.message);
+                // console.log(responseData.error);
             }
 
             setError(

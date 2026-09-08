@@ -224,7 +224,7 @@ def get_invoices(db: Session = Depends(get_db)):
              "currency": invoice.currency,
              "status": invoice.status, 
              "input_type": invoice.input_type , 
-             "created_at": invoice.created_at 
+             "created_at": invoice.created_at.isoformat() if invoice.created_at else None 
             } 
         ) 
         
@@ -279,7 +279,7 @@ def get_invoice(
         "line_items": json.loads(invoice.line_items) if invoice.line_items else [],
         "validation_results": json.loads(invoice.validation_results) if invoice.validation_results else [],
         "status": invoice.status,
-        "created_at": invoice.created_at
+        "created_at": invoice.created_at.isoformat() if invoice.created_at else None
     }
     
     return JSONResponse(
