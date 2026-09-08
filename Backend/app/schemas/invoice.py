@@ -21,3 +21,18 @@ class InvoiceExtraction(BaseModel):
     tax_rate: Optional[float] = Field( default=None, description="Tax percentage, for example 10 means 10 percent" ) 
     total: Optional[float] = Field( default=None ) 
     line_items: list[InvoiceItem] = Field( default_factory=list )
+    
+class ManualInvoice(BaseModel):
+    filename: Optional[str] = Field(default=None)
+    input_type: Optional[str] = Field(default="manual")
+    invoice_number: Optional[str] = Field( default=None, description="Invoice number" ) 
+    invoice_date: Optional[str] = Field( default=None, description="Invoice date in YYYY-MM-DD format when possible" ) 
+    due_date: Optional[str] = Field( default=None, description="Due date in YYYY-MM-DD format when possible" ) 
+    supplier_name: Optional[str] = Field( default=None ) 
+    currency: Optional[str] = Field( default="JPY", description="Currency code such as JPY. If not detect any Currency then use JPY as default" ) 
+    subtotal: Optional[float] = Field( default=None ) 
+    tax: Optional[float] = Field( default=None ) 
+    tax_rate: Optional[float] = Field( default=None, description="Tax percentage, for example 10 means 10 percent" ) 
+    total: Optional[float] = Field( default=None ) 
+    line_items: list[InvoiceItem] = Field( default_factory=list )
+    

@@ -28,3 +28,17 @@ export const getInvoiceById = async (invoiceId) => {
     const response = await axios.get(`${apiUrl}/api/invoices/${invoiceId}`);
     return response.data;
 };
+
+export const createManualInvoice = async (invoiceData) => { 
+    const response = await fetch( 
+        `${apiUrl}/api/invoices/manual`, 
+        { 
+            method: "POST", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(invoiceData) 
+        } 
+    ); 
+    
+    const data = await response.json(); 
+    return data; 
+};

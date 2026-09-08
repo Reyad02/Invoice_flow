@@ -9,9 +9,6 @@ function InvoiceList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ==============================
-  // LOAD INVOICES
-  // ==============================
   const loadInvoices = async () => {
     try {
       setLoading(true);

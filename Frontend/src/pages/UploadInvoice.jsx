@@ -29,19 +29,11 @@ function UploadInvoice() {
             setError("");
             const response = await processInvoice(file);
 
-            // ============================
-            // SUCCESS
-            // ============================
-
             if (response.success) {
                 const invoiceId =response.data[0].invoice_id;
                 navigate(`/invoices/${invoiceId}`);
                 return;
             }
-
-            // ============================
-            // VALIDATION ERROR
-            // ============================
 
             if (response.error?.details === "Validation_Error") {
 
@@ -62,22 +54,11 @@ function UploadInvoice() {
                 // console.log(response.error);
             }
 
-
-            // ============================
-            // OTHER ERROR
-            // ============================
-
             setError(response.message);
         }
 
         catch (error) {
             const responseData = error.response?.data;
-
-
-            // ============================
-            // VALIDATION ERROR
-            // ============================
-
             if (responseData?.error?.details === "Validation_Error") {
                 navigate("/manual-invoice",
                     {

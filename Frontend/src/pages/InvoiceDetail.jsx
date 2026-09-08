@@ -10,9 +10,6 @@ function InvoiceDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ==============================
-  // LOAD INVOICE
-  // ==============================
   const loadInvoice = async () => {
     try {
       setLoading(true);
@@ -36,9 +33,6 @@ function InvoiceDetail() {
     loadInvoice();
   }, [invoiceId]);
 
-  // ==============================
-  // LOADING
-  // ==============================
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -47,9 +41,6 @@ function InvoiceDetail() {
     );
   }
 
-  // ==============================
-  // ERROR
-  // ==============================
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
@@ -61,9 +52,6 @@ function InvoiceDetail() {
     );
   }
 
-  // ==============================
-  // NO INVOICE
-  // ==============================
   if (!invoice) {
     return null;
   }

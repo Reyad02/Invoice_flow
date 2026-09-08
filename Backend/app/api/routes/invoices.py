@@ -7,6 +7,7 @@ from app.database.database import get_db
 from app.models.invoice import Invoice
 from app.graphs.invoice_graph import invoice_graph
 from app.utils.file_utils import is_allowed_file, generate_filename
+from app.schemas.invoice import ManualInvoice
 from fastapi.responses import JSONResponse
 
 router = APIRouter()
@@ -208,7 +209,72 @@ async def process_invoice(
         if os.path.exists(file_path):
             os.remove(file_path)
             
-@router.get( "/" ) 
+@router.post("/manual")
+async def manual_process(
+    invoice_details: ManualInvoice,
+    db: Session = Depends(get_db)
+):
+    try: 
+        invoice = Invoice(
+            filename=invoice_details.filename,
+            input_type=invoice_details.input_type,
+            invoice_number=invoice_details.invoice_number,
+            supplier_name=invoice_details.supplier_name,
+            invoice_date=invoice_details.invoice_date,
+            due_date=invoice_details.due_date,
+            currency=invoice_details.currency,
+            subtotal=invoice_details.subtotal,
+            tax=invoice_details.tax,
+            tax_rate=invoice_details.tax_rate,
+            total=invoice_details.total,
+            line_items=json.dumps([item.model_dump() for item in invoice_details.line_items]),
+            validation_results=json.dumps([]),
+            status="VALID"
+        )
+        
+        db.add(invoice)
+        db.commit()
+        db.refresh(invoice)
+        
+        return JSONResponse(
+            status_code=201,
+            content={
+                "success": True,
+                "message": "Invoice processed successfully",
+                "data": [
+                            {
+                                "invoice_id": invoice.id,
+                                "filename": invoice_details.filename,
+                                "input_type": invoice_details.input_type,
+                                "status": "VALID",
+                                "invoice_data": invoice_details.model_dump(),
+                                "validation_results": [],
+                                "error": {}
+                            }
+                        ],
+                "error": {
+                    "code": "",
+                    "details": ""
+                }
+            }
+        )
+    
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "message": "Something went wrong while processing the invoice",
+                "data": None,
+                "error": {
+                    "code": "500",
+                    "details": str(e)
+                }
+            }
+        )
+
+@router.get("/") 
 def get_invoices(db: Session = Depends(get_db)): 
     invoices = db.query(Invoice).order_by(Invoice.created_at.desc()).all()  
     results = [] 
@@ -242,7 +308,6 @@ def get_invoices(db: Session = Depends(get_db)):
     )
 
 @router.get("/{invoice_id}")
-
 def get_invoice(
     invoice_id: int,
     db: Session = Depends(get_db)
